@@ -3,18 +3,22 @@
 '''
 @Author: Jin X
 @Date: 2020-02-25 22:18:16
-@LastEditTime: 2020-02-26 15:21:45
+@LastEditTime: 2020-02-26 20:06:36
 '''
 import requests
-import time
-import threading
+
+# stock symbols for Nvida, AMD, Alibaba, Coca-cola, Disney
+# Amazon, BiliBili, Netease, Intel, Nike
+stocksName = ['NVDA', 'AMD', 'BABA', 'KO', 'DIS',
+              'AMZN', 'BILI', 'NTES', 'INTC', 'NKE']
 
 
-stocksName = ['AMZN', 'NVDA']
 url = 'https://query1.finance.yahoo.com/v8/finance/chart/AMZN'
-payload = {
-    'period1': 1519448400,
-    'period2': int(time.time()),
+
+
+payload = {                                 # Default time period
+    'period1': 1582295400-3600*24*365,      # From Feb. 21 2019
+    'period2': 1582295400,                  # To   Feb. 21 2020
     'interval': '1d',
     'includePrePost': 'true',
     # 'event': 'div%7Csplit%7Cearn',
@@ -23,13 +27,6 @@ payload = {
     # 'crumb': 'd1Iz5Itdme5',
     'corsDomain': 'finance.yahoo.com'
 }
-
-
-def periodSeq(t=1582641000):
-    cur = int(time.time())
-    while cur-t > 86400:
-        yield (t-1, t+1)
-        t += 86400
 
 
 def requestStocks(periods):
@@ -45,36 +42,20 @@ def requestStocks(periods):
         if timestamp is None:
             return a
         quote = result['indicators']['quote'][0]
-        # zipped = zip(timestamp, quote['open'], quote['close'],
-        #  quote['volume'], quote['low'], quote['high'])
-
-        # for qTime, qOpen, qClose, qVolume, qLow, qHigh in zipped:
-        #     print(str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1])
         a.append((stock, timestamp, quote))
     return a
 
 
-def requestThread(periodseq):
-    try:
-        period = next(periodseq)
-    except StopIteration:
-        return
-    stocks = requestStocks(period)
-    print('requested---'+time.strftime('%Y-%m-%d %H:%M:%S'))
-    for stock in stocks:
-        print('name {}, time {}'.format(stock[0], stock[1]))
-    threading.Timer(5, requestThread, [periodseq]).start()
-
-
 if __name__ == '__main__':
-    for stock in stocks:
+    for stock in stocksName:
         payload['symbol'] = stock
+        payload['interval'] = '1d'
         r = requests.get(url, payload)
         result = r.json()['chart']['result'][0]
         timestamp = result['timestamp']
         quote = result['indicators']['quote'][0]
 
-        with open(r'./data/{}.csv'.format(stock), 'w+') as f:
+        with open(r'./data/1d/{}.csv'.format(stock), 'w+') as f:
             f.write('timestamp,open,close,volume,low,high\n')
             for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
                     zip(timestamp, quote['open'], quote['close'],
@@ -82,5 +63,16 @@ if __name__ == '__main__':
                 f.write(
                     str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
 
-    # periods = periodSeq(1580308200)
-    # requestThread(periods)
+        payload['interval'] = '1h'
+        r = requests.get(url, payload)
+        result = r.json()['chart']['result'][0]
+        timestamp = result['timestamp']
+        quote = result['indicators']['quote'][0]
+
+        with open(r'./data/1h/{}.csv'.format(stock), 'w+') as f:
+            f.write('timestamp,open,close,volume,low,high\n')
+            for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
+                    zip(timestamp, quote['open'], quote['close'],
+                        quote['volume'], quote['low'], quote['high']):
+                f.write(
+                    str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
