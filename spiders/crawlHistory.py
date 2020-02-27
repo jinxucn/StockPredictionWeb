@@ -3,14 +3,14 @@
 '''
 @Author: Jin X
 @Date: 2020-02-25 22:18:16
-@LastEditTime: 2020-02-26 21:13:46
+@LastEditTime: 2020-02-27 15:43:04
 '''
 import requests
 
 # stock symbols for Nvida, AMD, Alibaba, Coca-cola, Disney
-# Amazon, BiliBili, Netease, Intel, Nike
+# Amazon, BiliBili, Netease, Google, Yahoo
 stocksName = ['NVDA', 'AMD', 'BABA', 'KO', 'DIS',
-              'AMZN', 'BILI', 'NTES', 'INTC', 'NKE']
+              'AMZN', 'BILI', 'NTES', 'GOOG', 'YOJ.SG']
 
 
 url = 'https://query1.finance.yahoo.com/v8/finance/chart/AMZN'
@@ -44,6 +44,20 @@ def requestStocks(periods):
         quote = result['indicators']['quote'][0]
         a.append((stock, timestamp, quote))
     return a
+
+
+def requestStock(name, periods, interval):
+    payload['symbol'] = name
+    payload['period1'] = periods[0]
+    payload['period2'] = periods[1]
+    payload['interval'] = interval
+    r = requests.get(url, payload)
+    result = r.json()['chart']['result'][0]
+    timestamp = result.get('timestamp')
+    if timestamp is None:
+        return None, None
+    quote = result['indicators']['quote'][0]
+    return timestamp, quote
 
 
 if __name__ == '__main__':

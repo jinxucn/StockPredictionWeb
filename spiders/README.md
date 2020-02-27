@@ -12,12 +12,23 @@ Install  **requests**:
 
 ## Usage
 
+By default, this program collects stock data of Google, Yahoo, Nvida, AMD, Alibaba, Coca-cola, Disney, Amazon, BiliBili, Netease.
+
 For historical data:
 
 ```
 >python crawlHistory.py
 ```
 
-- By default, it crawls stocks information from Feb-21-2019 to Feb-21-2020, the intervals are one-day and one-hour, which will be separately stored in *./data/1d/* and *./data/1h/*.
+- Time period is from Feb-21-2019 to Feb-21-2020 GMT-5
+- Two different intervals data: one-day and one-hour, which will be separately stored in *./data/1d/%StockSymbol%* and *./data/1h/%StockSymbol%*.
 
-- By default, it collects stock of Nvida, AMD, Alibaba, Coca-cola, Disney, Amazon, BiliBili, Netease, Intel, and Nike.
+For real-time data:
+
+```
+>python crawlRealTime.py
+```
+
+- The initial time is Feb 26 2020, 13:20 GMT-5
+- It crawls the data every minute, hour or day, depending on the current weekday and the hour
+- Data would be store in *./data/1m/%StockSymbol​%*
