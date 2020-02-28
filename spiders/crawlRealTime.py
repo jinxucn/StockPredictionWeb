@@ -3,14 +3,13 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-02-28 12:17:04
+@LastEditTime: 2020-02-28 12:23:06
 '''
 from crawlHistory import *
 import time
 from multiprocessing import Process
 
 
-# 1582827540
 
 
 def periodSeq(t=1582641000):

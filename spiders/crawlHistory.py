@@ -3,14 +3,14 @@
 '''
 @Author: Jin X
 @Date: 2020-02-25 22:18:16
-@LastEditTime: 2020-02-27 15:43:04
+@LastEditTime: 2020-02-28 12:22:53
 '''
 import requests
 
 # stock symbols for Nvida, AMD, Alibaba, Coca-cola, Disney
-# Amazon, BiliBili, Netease, Google, Yahoo
+# Amazon, BiliBili, Netease, Google, Intel
 stocksName = ['NVDA', 'AMD', 'BABA', 'KO', 'DIS',
-              'AMZN', 'BILI', 'NTES', 'GOOG', 'YOJ.SG']
+              'AMZN', 'BILI', 'NTES', 'GOOG', 'INTC']
 
 
 url = 'https://query1.finance.yahoo.com/v8/finance/chart/AMZN'
