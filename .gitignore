@@ -1,3 +1,2 @@
 .vscode
-*.csv
 /spider/__pycache__
