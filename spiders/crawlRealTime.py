@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-02-27 17:00:15
+@LastEditTime: 2020-02-28 12:10:35
 '''
 from crawlHistory import *
 import time
@@ -11,6 +11,8 @@ from multiprocessing import Process
 
 
 # 1582827540
+
+tz_ny = tz.gettz('America/New_York')
 
 
 def periodSeq(t=1582641000):
@@ -54,16 +56,18 @@ def requestProcess(name, lastStamp):
             time.sleep(3600*12)
         print('{} :lastStamp: {},state: crawling'.format(
             name, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastStamp))))
-        periods = [lastStamp, int(time.time())]
+        curr = int(time.time())
+        periods = [lastStamp, curr-curr % 60]
         timestamp, quote = requestStock(name, periods, interval)
         if timestamp is not None:
             with open('./data/1m/{}.csv'.format(name), 'a+') as f:
                 for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
                         zip(timestamp, quote['open'], quote['close'],
                             quote['volume'], quote['low'], quote['high']):
-                    f.write(
-                        str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
-            lastStamp = timestamp[-1]
+                    if qOpen is not None:
+                        f.write(
+                            str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
+                        lastStamp = qTime
 
 
 if __name__ == '__main__':
