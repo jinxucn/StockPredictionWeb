@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-03-01 15:09:55
-@LastEditTime: 2020-03-03 13:09:18
+@LastEditTime: 2020-03-03 13:31:59
 '''
 import pymysql
 from threading import Lock
@@ -24,12 +24,15 @@ class DbConnector:
         self.lock.acquire()
         if not self.conn.open:
             self.reConn()
-        with self.conn.cursor() as cursor:
+        try:
+            with self.conn.cursor() as cursor:
 
-            sql = 'INSERT INTO real_time VALUES (%s,%s,%s,%s,%s,%s,%s)'
-            cursor.execute(sql, [stockID, qTime, qOpen,
-                                 qClose, qVolume, qHigh, qLow])
-        self.conn.commit()
+                sql = 'INSERT INTO real_time VALUES (%s,%s,%s,%s,%s,%s,%s)'
+                cursor.execute(sql, [stockID, qTime, qOpen,
+                                    qClose, qVolume, qHigh, qLow])
+            self.conn.commit()
+        except Exception as e:
+            print(e)
         self.lock.release()
 
     def closeConn(self):
