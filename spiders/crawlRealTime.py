@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-03-03 00:12:28
+@LastEditTime: 2020-03-03 13:10:11
 '''
 from crawlHistory import *
 from sqlConc import *
@@ -25,10 +25,12 @@ def requestThread(name, lastStamp):
                 print('state: sleep 1 minute')
                 time.sleep(60)
             else:
+                db.closeConn()
                 print('state: sleep 1 hour')
                 time.sleep(3600)
                 interval = '1h'
         else:
+            db.closeConn()
             print('state: sleep 1 day')
             time.sleep(3600*12)
         print('{} :lastStamp: {},state: crawling'.format(
@@ -58,8 +60,8 @@ if __name__ == '__main__':
     lastStamp = {}
     for stock in stockSymbols:
         lastStamp[stock] = 1583183000  # Mar. 2 2020, 16:00 GMT-5
-        with open('./data/1m/{}.csv'.format(stock), 'w+') as f:
-            f.write('timestamp,open,close,volume,low,high\n')
+        # with open('./data/1m/{}.csv'.format(stock), 'w+') as f:
+        #     f.write('timestamp,open,close,volume,low,high\n')
 
     for stock in stockSymbols:
         # p = Process(target=requestThread, args=(stock, lastStamp[stock]))

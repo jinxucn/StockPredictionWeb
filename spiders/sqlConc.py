@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-03-01 15:09:55
-@LastEditTime: 2020-03-03 00:07:42
+@LastEditTime: 2020-03-03 13:09:18
 '''
 import pymysql
 from threading import Lock
@@ -22,6 +22,8 @@ class DbConnector:
 
     def insertRT(self, stockID, qTime, qOpen, qClose, qVolume, qLow, qHigh):
         self.lock.acquire()
+        if not self.conn.open:
+            self.reConn()
         with self.conn.cursor() as cursor:
 
             sql = 'INSERT INTO real_time VALUES (%s,%s,%s,%s,%s,%s,%s)'
