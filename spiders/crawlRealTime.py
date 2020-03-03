@@ -3,23 +3,26 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-03-03 13:33:50
+@LastEditTime: 2020-03-03 15:57:34
 '''
 from crawlHistory import *
 from sqlConc import *
 import time
-# from multiprocessing import Process
 from threading import Thread
 
 db = DbConnector()
 
 
+# thread that crawl real time data
+# depending on current time, sleep for a time period
+# @param name: str,symbol of the stock
+# @param lastStamp: int,in every loop, crawl data from last time stamp to current time stamp
 def requestThread(name, lastStamp):
     while True:
         weekday = time.localtime().tm_wday
         hour = time.localtime().tm_hour
-        interval = '1m'
-        print('{} :'.format(name), end='')
+        interval = '1m'                         # default interval is 1m unless
+        print('{} :'.format(name), end='')      # market is not open
         if 0 <= weekday <= 4:
             if 9 <= hour < 16:
                 print('state: sleep 1 minute')
@@ -35,10 +38,12 @@ def requestThread(name, lastStamp):
             time.sleep(3600*12)
         print('{} :lastStamp: {},state: crawling'.format(
             name, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastStamp))))
+        # calculate last exact minute
         curr = int(time.time())
         periods = [lastStamp, curr-curr % 60]
         timestamp, quote = requestStock(name, periods, interval)
         if timestamp is not None:
+            # DISCARDED ! write the data into local files
             # with open('./data/1m/{}.csv'.format(name), 'a+') as f:
             #     for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
             #             zip(timestamp, quote['open'], quote['close'],
@@ -47,6 +52,8 @@ def requestThread(name, lastStamp):
             #             f.write(
             #                 str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
             #             lastStamp = qTime
+
+            # upload data to database
             for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
                     zip(timestamp, quote['open'], quote['close'],
                         quote['volume'], quote['low'], quote['high']):
@@ -59,7 +66,9 @@ def requestThread(name, lastStamp):
 if __name__ == '__main__':
     lastStamp = {}
     for stock in stockSymbols:
+        # initialize the timestamp for every stock
         lastStamp[stock] = 1583245800  # Mar. 2 2020, 16:00 GMT-5
+        # DISCARDED ! write to local files
         # with open('./data/1m/{}.csv'.format(stock), 'w+') as f:
         #     f.write('timestamp,open,close,volume,low,high\n')
 
