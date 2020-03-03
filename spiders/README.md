@@ -12,7 +12,7 @@ Install  **requests**:
 
 ## Usage
 
-By default, this program collects stock data of Google, Yahoo, Nvida, AMD, Alibaba, Coca-cola, Disney, Amazon, BiliBili, Netease.
+By default, this program collects stock data of Google, Intel, Nvida, AMD, Alibaba, Coca-cola, Disney, Amazon, BiliBili, Netease.
 
 For historical data:
 
