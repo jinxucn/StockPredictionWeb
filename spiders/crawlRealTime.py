@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-03-03 23:13:03
+@LastEditTime: 2020-03-03 23:26:17
 '''
 from crawlHistory import *
 from sqlConc import *
@@ -33,10 +33,14 @@ def requestThread(name, lastStamp):
                 nextOpenTime = time.mktime(
                     (lt.tm_year, lt.tm_mon, lt.tm_mday+1, 9, 30, 0, 0, 0, 0))
                 print('{} state: sleep to next open time'.format(name))
+                lastStamp = nextOpenTime
                 time.sleep(nextOpenTime-time.mktime(lt))
         else:
-            print('{} state: sleep 2 day'.format(name))
-            time.sleep(3600*24*2)
+            print('{} state: sleep to next open time'.format(name))
+            nextOpenTime = time.mktime(
+                (lt.tm_year, lt.tm_mon, lt.tm_mday+7-weekday, 9, 30, 0, 0, 0, 0))
+            lastStamp = nextOpenTime
+            time.sleep(nextOpenTime-time.mktime(lt))
         print('{} :lastStamp: {},state: crawling'.format(
             name, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastStamp))))
         # calculate last exact minute
