@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-03-03 15:57:34
+@LastEditTime: 2020-03-03 23:02:54
 '''
 from crawlHistory import *
 from sqlConc import *
@@ -19,23 +19,25 @@ db = DbConnector()
 # @param lastStamp: int,in every loop, crawl data from last time stamp to current time stamp
 def requestThread(name, lastStamp):
     while True:
-        weekday = time.localtime().tm_wday
-        hour = time.localtime().tm_hour
+        lt = time.localtime()
+        weekday = lt.tm_wday
+        hour = lt.tm_hour
+        minute = lt.tm_min
         interval = '1m'                         # default interval is 1m unless
         print('{} :'.format(name), end='')      # market is not open
         if 0 <= weekday <= 4:
-            if 9 <= hour < 16:
+            if (10 <= hour < 16) or (hour == 16 and minute < 10) or (hour == 9 and minute > 30):
                 print('state: sleep 1 minute')
                 time.sleep(60)
             else:
                 db.closeConn()
-                print('state: sleep 1 hour')
-                time.sleep(3600)
-                interval = '1h'
+                nextOpenTime = time.mktime(
+                    (lt.tm_year, lt.tm_mon, lt.tm_mday+1, 30, 0, 0, 0, 0))
+                print('state: sleep to next open time')
+                time.sleep(nextOpenTime-lt)
         else:
-            db.closeConn()
-            print('state: sleep 1 day')
-            time.sleep(3600*12)
+            print('state: sleep 2 day')
+            time.sleep(3600*24*2)
         print('{} :lastStamp: {},state: crawling'.format(
             name, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastStamp))))
         # calculate last exact minute
