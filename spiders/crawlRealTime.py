@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-03-03 23:02:54
+@LastEditTime: 2020-03-03 23:07:44
 '''
 from crawlHistory import *
 from sqlConc import *
@@ -32,7 +32,7 @@ def requestThread(name, lastStamp):
             else:
                 db.closeConn()
                 nextOpenTime = time.mktime(
-                    (lt.tm_year, lt.tm_mon, lt.tm_mday+1, 30, 0, 0, 0, 0))
+                    (lt.tm_year, lt.tm_mon, lt.tm_mday+1, 9, 30, 0, 0, 0, 0))
                 print('state: sleep to next open time')
                 time.sleep(nextOpenTime-lt)
         else:
