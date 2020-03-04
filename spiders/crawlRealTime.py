@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-26 15:16:09
-@LastEditTime: 2020-03-03 23:07:44
+@LastEditTime: 2020-03-03 23:13:03
 '''
 from crawlHistory import *
 from sqlConc import *
@@ -24,19 +24,18 @@ def requestThread(name, lastStamp):
         hour = lt.tm_hour
         minute = lt.tm_min
         interval = '1m'                         # default interval is 1m unless
-        print('{} :'.format(name), end='')      # market is not open
-        if 0 <= weekday <= 4:
+        if 0 <= weekday <= 4:                   # market is not open
             if (10 <= hour < 16) or (hour == 16 and minute < 10) or (hour == 9 and minute > 30):
-                print('state: sleep 1 minute')
+                print('{} state: sleep 1 minute'.format(name))
                 time.sleep(60)
             else:
                 db.closeConn()
                 nextOpenTime = time.mktime(
                     (lt.tm_year, lt.tm_mon, lt.tm_mday+1, 9, 30, 0, 0, 0, 0))
-                print('state: sleep to next open time')
-                time.sleep(nextOpenTime-lt)
+                print('{} state: sleep to next open time'.format(name))
+                time.sleep(nextOpenTime-time.mktime(lt))
         else:
-            print('state: sleep 2 day')
+            print('{} state: sleep 2 day'.format(name))
             time.sleep(3600*24*2)
         print('{} :lastStamp: {},state: crawling'.format(
             name, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastStamp))))

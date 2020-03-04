@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-03-01 15:09:55
-@LastEditTime: 2020-03-03 22:59:59
+@LastEditTime: 2020-03-03 23:18:34
 '''
 import pymysql
 from threading import Lock
@@ -40,8 +40,10 @@ class DbConnector:
         self.lock.release()
 
     def closeConn(self):
+        self.lock.acquire()
         if self.conn.open:
             self.conn.close()
+        self.lock.release()
 
     def reConn(self):
         self.conn = pymysql.connect(
