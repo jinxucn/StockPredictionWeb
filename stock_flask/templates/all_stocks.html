@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset = "UTF-8">
+</head>
+<body> 
+  {% for all_stocks in myStock%}
+  <li> {{all_stocks.stock_id}} {{all_stocks.open}} </li>
+  {%endfor%}
+</body>
+</html>
