@@ -65,5 +65,24 @@ alter table history_day modify day int;
 alter table history_hour modify hour int;
 
 
+#create algorithm table and prediction table
+
+create table algorithm
+(algorithm_ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+algorithm_name VARCHAR(40) NOT NULL)
+
+insert into algorithm (algorithm_name)values
+("POLY_BAYES") ,("SVM"), ("LSTM"), ("ARIMA")
+
+create table prediction
+(
+stock_ID INT UNSIGNED,
+algorithm_ID INT UNSIGNED AUTO_INCREMENT,
+time_stamp int,
+pred_value float,
+PRIMARY KEY(stock_ID, algorithm_ID, time_stamp),
+FOREIGN KEY(stock_ID) REFERENCES stock_name(stock_ID),
+FOREIGN KEY(algorithm_ID) REFERENCES algorithm(algorithm_ID)
+)
 
 
