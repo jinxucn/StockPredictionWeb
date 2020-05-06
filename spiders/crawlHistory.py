@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-02-25 22:18:16
-@LastEditTime: 2020-05-02 21:14:42
+@LastEditTime: 2020-05-02 21:18:22
 '''
 import requests
 # from sqlConc import loadHistory
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         # Crawl 1-day data
         url = 'https://query1.finance.yahoo.com/v8/finance/chart/'+stock
         payload['symbol'] = stock
-        payload['interval'] = '1m'
+        payload['interval'] = '1mjj'
         payload['period1'] = 1587758400
         payload['period2'] = 1588363200
         r = requests.get(url, payload)
