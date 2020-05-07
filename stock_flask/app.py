@@ -136,13 +136,13 @@ def getReal(name):
     return jsonify(result)
 
 #sql question 2 get real time data
-@app.route('/getStock/real/<string:name>', methods = ['GET'])
-def getReal(name):
-    stock = Stock.query.filter_by(stock_name=name).first()
-    real_id = stock.stock_id
-    real =  Real_time.query.filter_by(stock_id = real_id)
-    result = real_timesSchema.dump(real)
-    return jsonify(result)
+# @app.route('/getStock/real/<string:name>', methods = ['GET'])
+# def getReal(name):
+#     stock = Stock.query.filter_by(stock_name=name).first()
+#     real_id = stock.stock_id
+#     real =  Real_time.query.filter_by(stock_id = real_id)
+#     result = real_timesSchema.dump(real)
+#     return jsonify(result)
 
 
 if __name__ == '__main__':
