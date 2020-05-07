@@ -3,7 +3,7 @@
 '''
 @Author: Jin X
 @Date: 2020-03-01 15:09:55
-@LastEditTime: 2020-03-03 23:18:34
+@LastEditTime: 2020-05-07 13:14:03
 '''
 import pymysql
 from threading import Lock
@@ -58,7 +58,7 @@ class DbConnector:
 # load history data to database
 # @param type, str, 1h or 1d
 # @param data, list(tuple): [(id,timestamp,quote...),...]
-def loadHistory(type, data):
+def load(type, data):
     conn = pymysql.connect(
         host='jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com',
         user='stockpredictor',
@@ -70,10 +70,40 @@ def loadHistory(type, data):
         with conn.cursor() as cursor:
             if type == '1h':
                 sql = 'insert into history_hour values (%s,%s,%s,%s,%s,%s,%s)'
-                cursor.executemany(sql, data)
-            if type == '1d':
+            elif type == '1d':
                 sql = 'insert into history_day values (%s,%s,%s,%s,%s,%s,%s)'
-                cursor.executemany(sql, data)
+            elif type == '1m':
+                sql = 'insert into real_time values (%s,%s,%s,%s,%s,%s,%s)'
+            cursor.executemany(sql, data)
         conn.commit()
     finally:
         conn.close()
+
+
+def getLatestTime(type, ids):
+    conn = pymysql.connect(
+        host='jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com',
+        user='stockpredictor',
+        password='buyer',
+        database='stocks',
+        charset='utf8'
+    )
+    res = {}
+    try:
+        if type == '1h':
+            sql = 'select max(hour) from history_hour where stock_ID='
+        elif type == '1d':
+            sql = 'select max(day) from history_day where stock_ID='
+        elif type == '1m':
+            sql = 'select max(minute) from real_time where stock_ID='
+        with conn.cursor() as cursor:
+            for stockId in ids:
+                cursor.execute(sql+str(stockId))
+                res[stockId] = cursor.fetchone()[0]
+    finally:
+        conn.close()
+    return res
+
+
+if __name__ == "__main__":
+    print(getLatestTime('1m', [1, 2, 3]))

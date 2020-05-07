@@ -3,10 +3,11 @@
 '''
 @Author: Jin X
 @Date: 2020-02-25 22:18:16
-@LastEditTime: 2020-05-02 21:18:22
+@LastEditTime: 2020-05-07 12:28:18
 '''
 import requests
-# from sqlConc import loadHistory
+import time
+from sqlConc import loadHistory
 
 # stock symbols for Nvida, AMD, Alibaba, Coca-cola, Disney
 # Amazon, BiliBili, Netease, Google, Intel
@@ -24,7 +25,7 @@ url = 'https://query1.finance.yahoo.com/v8/finance/chart/AMZN'
 # parameters for api
 payload = {                                 # Default time period
     'period1': 1582295400-3600*24*365,      # From Feb. 21 2019
-    'period2': 15883398000,                  # To   Mar. 2 2020
+    'period2': int(time.time()),                  # To   Mar. 2 2020
     # 'period1': 1574692200-3600*24*365,      # From Feb. 21 2019
     # 'period2': 1574692200,                  # To   Mar. 2 2020
     'interval': '1d',
@@ -77,21 +78,22 @@ if __name__ == '__main__':
         # Crawl 1-day data
         url = 'https://query1.finance.yahoo.com/v8/finance/chart/'+stock
         payload['symbol'] = stock
-        payload['interval'] = '1mjj'
-        payload['period1'] = 1587758400
-        payload['period2'] = 1588363200
+        payload['interval'] = '1m'
+        curr = int(time.time())
+        payload['period1'] = curr-3600*24*7
+        payload['period2'] = curr
         r = requests.get(url, payload)
         result = r.json()['chart']['result'][0]
         timestamp = result['timestamp']
         quote = result['indicators']['quote'][0]
 
         # upload to database
-        # sid = [stockIDs[stock] for i in range(len(timestamp))]
-        # data = list(
-        #     zip(sid, timestamp, quote['open'], quote['close'], quote['volume'],
-        #         quote['low'], quote['high']))
-        # loadHistory('1d', data)
-
+        sid = [stockIDs[stock] for i in range(len(timestamp))]
+        data = list(
+            zip(sid, timestamp, quote['open'], quote['close'], quote['volume'],
+                quote['low'], quote['high']))
+        data = [d for d in data if d[4] != 0]
+        loadHistory('1m', data)
         ### DISCARDED! write the data to local files
         # with open(r'./data/1d/{}.csv'.format(stock), 'w+') as f:
         #     f.write('timestamp,open,close,volume,low,high\n')
@@ -116,10 +118,10 @@ if __name__ == '__main__':
         # loadHistory('1h', data)
 
         ### DISCARDED! write the data to local files
-        with open(r'./data/1m/{}.csv'.format(stock), 'w+') as f:
-            f.write('timestamp,open,close,volume,low,high\n')
-            for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
-                    zip(timestamp, quote['open'], quote['close'],
-                        quote['volume'], quote['low'], quote['high']):
-                if qVolume:
-                    f.write(str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
+        # with open(r'./data/1m/{}.csv'.format(stock), 'w+') as f:
+        #     f.write('timestamp,open,close,volume,low,high\n')
+        #     for qTime, qOpen, qClose, qVolume, qLow, qHigh in \
+        #             zip(timestamp, quote['open'], quote['close'],
+        #                 quote['volume'], quote['low'], quote['high']):
+        #         if qVolume:
+        #             f.write(str([qTime, qOpen, qClose, qVolume, qLow, qHigh])[1:-1]+'\n')
