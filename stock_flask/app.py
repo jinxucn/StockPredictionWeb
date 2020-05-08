@@ -97,10 +97,12 @@ history_daysSchema = History_daySchema(many=True)
 real_timeSchema = Real_timeSchema()
 real_timesSchema = Real_timeSchema(many=True)
 
+
 # sample api get
 @app.route('/', methods=['GET'])
 def get():
-    return jsonify({"hello": "world"})
+    # return jsonify({"hello": "world"})
+    return render_template('index.html')
 
 # run server, get all stock ticker
 @app.route('/getStock', methods=['GET'])
