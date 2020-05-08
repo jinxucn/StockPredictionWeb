@@ -147,15 +147,16 @@ def getReal(name):
     real_id = stock.stock_id
     detail = Real_time.query.filter_by(stock_id=real_id)
     list_open = [u.open for u in detail]
-    list_minute = [u.day for u in detail]
+    list_minute = [u.minute for u in detail]
     list_close = [u.close for u in detail]
     list_volume = [u.volume for u in detail]
     list_high = [u.high for u in detail]
     list_low = [u.low for u in detail]
+    l = len(list_open)
     # result = real_timesSchema.dump(real)
-    return jsonify({"name": name, "open": list_open, "timestamp": list_minute,
-                    "close": list_close, "volume": list_volume,
-                    "high": list_high, "low": list_low
+    return jsonify({"name": name, "open": list_open, "timestamp": list_minute[-300:l],
+                    "close": list_close[-700:l], "volume": list_volume,
+                    "high": list_high[-300:l], "low": list_low
                     })
 
 

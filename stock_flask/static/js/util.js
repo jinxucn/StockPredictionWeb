@@ -42,10 +42,11 @@ $(function () {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: name,
-                    backgroundColor: "rgba(255,255,255,0.1",
-                    borderColor: "rgba(255,255,255,0.5",
+                    label: "History",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    borderColor: "rgba(255,255,255,0.5)",
                     data: data,
+                    pointRadius: 1,
                 }]
             },
             options: option,
@@ -59,26 +60,56 @@ $(function () {
         name = dataJson['name'];
         labels = dataJson['timestamp'];
         labels = labels.map(i => i * 1000);
-        data = dataJson['close'];
+        close = dataJson['close'];
+        high = dataJson['high'];
         chart2 = new Chart(ctx2, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: name,
-                    backgroundColor: "rgba(255,255,255,0.1",
-                    borderColor: "rgba(255,255,255,0.5",
-                    data: data,
+                    type: 'line',
+                    label: 'Real Time',
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    borderColor: "rgba(255,255,255,0.5)",
+                    data: close,
+                    pointRadius: 1
+                }, {
+                    type: 'scatter',
+                    label: 'high',
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                        borderColor: "rgba(255,255,255,0.5)",
+                        data: high,
                 }]
             },
-            options: option,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        autoskip: true,
+                        time: {
+                            // displayFormats: {
+                            //     quarter: 'll'
+                            // },
+                            unit: 'hour'
+                        },
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        }
+                    }]
+                }
+            },
         })
     }
     var loopflag;
     var rand = () => Math.random() * 100 + 10;
     function addRealLoop(name) {
         console.log("getting realtime " + name);
-        let url = "/getStock/real" + name;
+        let url = "/getStock/real/" + name;
         $.get(url, plotReal, "json")
         // loopflag = setTimeout(function () { addRealLoop(name), 60000 })
         // $.ajax({
