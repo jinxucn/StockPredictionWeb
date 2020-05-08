@@ -3,11 +3,11 @@
 '''
 @Author: Jin X
 @Date: 2020-02-25 22:18:16
-@LastEditTime: 2020-05-07 12:28:18
+@LastEditTime: 2020-05-07 23:06:01
 '''
 import requests
 import time
-from sqlConc import loadHistory
+from sqlConc import load
 
 # stock symbols for Nvida, AMD, Alibaba, Coca-cola, Disney
 # Amazon, BiliBili, Netease, Google, Intel
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             zip(sid, timestamp, quote['open'], quote['close'], quote['volume'],
                 quote['low'], quote['high']))
         data = [d for d in data if d[4] != 0]
-        loadHistory('1m', data)
+        load('1m', data)
         ### DISCARDED! write the data to local files
         # with open(r'./data/1d/{}.csv'.format(stock), 'w+') as f:
         #     f.write('timestamp,open,close,volume,low,high\n')
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         # data = list(
         #     zip(sid, timestamp, quote['open'], quote['close'], quote['volume'],
         #         quote['low'], quote['high']))
-        # loadHistory('1h', data)
+        # load('1h', data)
 
         ### DISCARDED! write the data to local files
         # with open(r'./data/1m/{}.csv'.format(stock), 'w+') as f:
