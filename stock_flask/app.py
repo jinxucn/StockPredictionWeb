@@ -60,15 +60,14 @@ class Real_time(db.Model):
     low = db.Column(db.Float)
     high = db.Column(db.Float)
 
-
-def __init__(self, stock_id, minute, open, close, volume, low, high):
-    self.stock_id = stock_id
-    self.day = minute
-    self.open = open
-    self.close = close
-    self.volume = volume
-    self.low = low
-    self.high = high
+    def __init__(self, stock_id, minute, open, close, volume, low, high):
+        self.stock_id = stock_id
+        self.minute = minute
+        self.open = open
+        self.close = close
+        self.volume = volume
+        self.low = low
+        self.high = high
 
 # product schema
 
@@ -155,8 +154,8 @@ def getReal(name):
     l = len(list_open)
     # result = real_timesSchema.dump(real)
     return jsonify({"name": name, "open": list_open, "timestamp": list_minute[-300:l],
-                    "close": list_close[-700:l], "volume": list_volume,
-                    "high": list_high[-300:l], "low": list_low
+                    "close": list_close[-300:l], "volume": list_volume,
+                    "high": list_high[-300:l], "low": list_low[-300:l]
                     })
 
 

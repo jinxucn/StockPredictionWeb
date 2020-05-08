@@ -62,6 +62,7 @@ $(function () {
         labels = labels.map(i => i * 1000);
         close = dataJson['close'];
         high = dataJson['high'];
+        low = dataJson['low'];
         chart2 = new Chart(ctx2, {
             type: 'line',
             data: {
@@ -74,11 +75,23 @@ $(function () {
                     data: close,
                     pointRadius: 1
                 }, {
-                    type: 'scatter',
                     label: 'high',
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                        borderColor: "rgba(255,255,255,0.5)",
-                        data: high,
+                    backgroundColor: "rgba(0,205,0,0.1)",
+                    borderColor: "rgba(0,205,0,0.5)",
+                    data: high,
+                    fill: false,
+                    showLine: false,
+                    pointStyle: 'cross',
+                    pointRadius: 3,
+                }, {
+                    label: 'low',
+                    backgroundColor: "rgba(205,0,0,0.1)",
+                    borderColor: "rgba(205,0,0,0.5)",
+                    data: low,
+                    fill: false,
+                    showLine: false,
+                    pointStyle: 'line',
+                    pointRadius: 3,
                 }]
             },
             options: {
