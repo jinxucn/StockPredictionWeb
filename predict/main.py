@@ -38,7 +38,7 @@ def long():
             data_1d[3, -27:], data_1d[2, -27:], data_1d[1, -27:])
         for i in range(15):
             df_indicator.loc[df_indicator.shape[0] + 1] = {'OperationTime': time,
-                                                           'StockID': stockIDs[stockName],
+                                                           'StockID': stockName,
                                                            'TargetTime': data_1d_raw[0, -i - 1],
                                                            'MACD_hist': MACD_hist_30d[i],
                                                            'BBupper': upper[i],
@@ -61,7 +61,7 @@ def long():
         y_lstm = predict_LSTM(lstm, test_x, 30)
         y_lstm = recover(data_1d[1], y_lstm)
         df_lstm.loc[df_lstm.shape[0] + 1] = {'OperationTime': time,
-                                             'StockID': stockIDs[stockName],
+                                             'StockID': stockName,
                                              'Algorithm': 'LSTM',
                                              'TargetTime': data_1d_raw[0, -i]+3600*24,
                                              'value': y_lstm}
@@ -82,7 +82,7 @@ def short():
         y_bayesian = bcf.predict(
             bcf.x[-24 * 7 - 1:-1], bcf.y[-24 * 7 - 1:-1], bcf.x[-1] + 5)
         df_bayesian.loc[df_bayesian.shape[0] + 1] = {'OperationTime': time,
-                                                     'StockID': stockIDs[stockName],
+                                                     'StockID': stockName,
                                                      'Algorithm': 'Bayesian',
                                                      'TargetTime': data_1m_raw[0, -i]+3600,
                                                      'value': y_bayesian}
@@ -93,7 +93,7 @@ def short():
         svr = SVR(data_1m)
         y_svr = svr.predict()
         df_svm.loc[df_svm.shape[0] + 1] = {'OperationTime': time,
-                                           'StockID': stockIDs[stockName],
+                                           'StockID': stockName,
                                            'Algorithm': 'SVM',
                                            'TargetTime': data_1m_raw[0, -i]+3600,
                                            'value': y_svr}
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 #     slowk, slowd = KDJ(data_1d[3, -27:], data_1d[2, -27:], data_1d[1, -27:])
 #     for i in range(15):
 #         df_indicator.loc[df_indicator.shape[0] + 1] = {'OperationTime': time,
-#                                                        'StockID': stockIDs[stockName],
+#                                                        'StockID': stockName,
 #                                                        'TargetTime': data_1d_raw[0, -i - 1],
 #                                                        'MACD_hist': MACD_hist_30d[i],
 #                                                        'BBupper': upper[i],
@@ -154,7 +154,7 @@ if __name__ == "__main__":
 #     y_bayesian = bcf.predict(
 #         bcf.x[-24 * 7 - 1:-1], bcf.y[-24 * 7 - 1:-1], bcf.x[-1] + 5)
 #     df_bayesian.loc[df_bayesian.shape[0] + 1] = {'OperationTime': time,
-#                                                  'StockID': stockIDs[stockName],
+#                                                  'StockID': stockName,
 #                                                  'Algorithm': 'Bayesian',
 #                                                  'TargetTime': data_1m_raw[0, -i]+3600,
 #                                                  'value': y_bayesian}
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 #     svr = SVR(data_1m)
 #     y_svr = svr.predict()
 #     df_svm.loc[df_svm.shape[0] + 1] = {'OperationTime': time,
-#                                        'StockID': stockIDs[stockName],
+#                                        'StockID': stockName,
 #                                        'Algorithm': 'SVM',
 #                                        'TargetTime': data_1m_raw[0, -i]+3600,
 #                                        'value': y_svr}
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 #     y_lstm = predict_LSTM(lstm, test_x, 30)
 #     y_lstm = recover(data_1d[1], y_lstm)
 #     df_lstm.loc[df_lstm.shape[0] + 1] = {'OperationTime': time,
-#                                          'StockID': stockIDs[stockName],
+#                                          'StockID': stockName,
 #                                          'Algorithm': 'LSTM',
 #                                          'TargetTime': data_1d_raw[0, -i]+3600*24,
 #                                          'value': y_lstm}
@@ -205,4 +205,3 @@ if __name__ == "__main__":
 
 
 # save_df(df_indicator, df_bayesian, df_arima, df_svm, df_lstm)
-
