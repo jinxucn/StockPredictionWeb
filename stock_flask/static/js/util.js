@@ -85,6 +85,7 @@ $(function () {
         labels = labels.map(i => i * 1000);
         let volume = dataJson['volume'];
         volume[0] = 0;
+        volume[volume.length - 1] = 0;
         let close = dataJson['close'];
         let high = dataJson['high'];
         let low = dataJson['low'];
