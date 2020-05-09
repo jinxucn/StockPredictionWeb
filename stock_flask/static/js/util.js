@@ -23,9 +23,16 @@ $(function () {
                 },
             }],
             yAxes: [{
+                id: 'left',
                 gridLines: {
                     color: "rgba(255,255,255,0.2)"
-                }
+                },
+                type: 'linear',
+                position: 'left'
+            }, {
+                id: 'right',
+                type: 'linear',
+                position: 'right',
             }]
         }
     };
@@ -33,23 +40,39 @@ $(function () {
     var chart2 = new Chart(ctx2, { type: "line", options: option })
     function plotHis(dataJson) {
         if (chart1) chart1.destroy();
-        name = dataJson['name'];
-        labels = dataJson['timestamp'];
+        let name = dataJson['name'];
+        let labels = dataJson['timestamp'];
         labels = labels.map(i => i * 1000);
-        data = dataJson['close'];
+        let close = dataJson['close'];
         chart1 = new Chart(ctx1, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: "History",
+                    label: 'close',
+                    data: close,
                     backgroundColor: "rgba(255,255,255,0.1)",
                     borderColor: "rgba(255,255,255,0.5)",
-                    data: data,
-                    pointRadius: 1,
                 }]
             },
-            options: option,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'month'
+                        },
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }]
+                }
+            },
         })
         let his = $("#historically").children().removeClass('zero')
         his[0].innerText = Math.max.apply(null, dataJson['high'])
@@ -57,14 +80,16 @@ $(function () {
     }
     function plotReal(dataJson) {
         if (chart2) chart2.destroy();
-        name = dataJson['name'];
-        labels = dataJson['timestamp'];
+        let name = dataJson['name'];
+        let labels = dataJson['timestamp'];
         labels = labels.map(i => i * 1000);
-        close = dataJson['close'];
-        high = dataJson['high'];
-        low = dataJson['low'];
+        let volume = dataJson['volume'];
+        volume[0] = 0;
+        let close = dataJson['close'];
+        let high = dataJson['high'];
+        let low = dataJson['low'];
         chart2 = new Chart(ctx2, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
@@ -73,25 +98,36 @@ $(function () {
                     backgroundColor: "rgba(255,255,255,0.1)",
                     borderColor: "rgba(255,255,255,0.5)",
                     data: close,
-                    pointRadius: 1
+                    pointRadius: 1,
+                    yAxisID: 'left',
                 }, {
+                    type: 'line',
                     label: 'high',
-                    backgroundColor: "rgba(0,205,0,0.1)",
-                    borderColor: "rgba(0,205,0,0.5)",
+                    backgroundColor: "rgba(0,205,0,0.5)",
+                    borderColor: "rgba(0,205,0,0.8)",
                     data: high,
                     fill: false,
                     showLine: false,
                     pointStyle: 'cross',
                     pointRadius: 3,
+                    yAxisID: 'left',
                 }, {
+                    type: 'line',
                     label: 'low',
-                    backgroundColor: "rgba(205,0,0,0.1)",
-                    borderColor: "rgba(205,0,0,0.5)",
+                    backgroundColor: "rgba(205,0,0,0.5)",
+                    borderColor: "rgba(205,0,0,0.8)",
                     data: low,
                     fill: false,
                     showLine: false,
                     pointStyle: 'line',
                     pointRadius: 3,
+                    yAxisID: 'left',
+                }, {
+                    label: 'volume',
+                    data: volume,
+                    backgroundColor: "rgba(26,24,23,1)",
+                    borderColor: "rgba(26,25,23,1)",
+                    yAxisID: 'right',
                 }]
             },
             options: {
@@ -110,21 +146,34 @@ $(function () {
                         },
                     }],
                     yAxes: [{
+                        id: 'left',
                         gridLines: {
                             color: "rgba(255,255,255,0.2)"
                         }
+                    }, {
+                        id: 'right',
+                        gridLines: {
+                            color: "rgba(25,25,25,0.2)"
+                        },
+                        display: false
+
                     }]
                 }
             },
-        })
+        });
+        let realtime = $('#realtime').children().removeClass('zero')
+        realtime[0].innerText = dataJson['high'].slice(-1)[0]
+        realtime[1].innerText = dataJson['low'].slice(-1)[0]
+        realtime[2].innerText = dataJson['volume'].slice(-1)[0]
+        realtime[3].innerText = dataJson['open'].slice(-1)[0]
+        realtime[4].innerText = dataJson['close'].slice(-1)[0]
     }
     var loopflag;
-    var rand = () => Math.random() * 100 + 10;
     function addRealLoop(name) {
         console.log("getting realtime " + name);
-        let url = "/getStock/real/" + name;
+        let url = "/stockdata?type=realtime&name=" + name;
         $.get(url, plotReal, "json")
-        // loopflag = setTimeout(function () { addRealLoop(name), 60000 })
+        loopflag = setTimeout(function () { addRealLoop(name) }, 60000)
         // $.ajax({
         //     type: 'GET',
         //     timeout: 10000,
@@ -134,7 +183,7 @@ $(function () {
         //     url: "/static/testdata/realtime.json",
         //     success: function (result) {
         //         let pre = $('#predict').children().removeClass('zero')
-        //         let realtime = $('#realtime').children().removeClass('zero')
+        // let realtime = $('#realtime').children().removeClass('zero')
         //         // pre[0].innerText=result["pre5minutes"]
         //         // pre[1].innerText=result["pre3days"]
         //         pre[0].innerText = rand()
@@ -153,7 +202,7 @@ $(function () {
         type: 'GET',
         timeout: 10000,
         dataType: 'json',
-        url: "/getStock",
+        url: "/stockNames",
         // data: "names"
         success: function (result) {
             let ul = $('ul.nav');
@@ -166,7 +215,7 @@ $(function () {
                     console.log("getting " + e["stock_name"])
                     // $.get("/data",e,plotChart,"json")
                     // let url = "/static/testdata/" + e["stock_name"] + ".json";
-                    let url = "/getStock/" + e["stock_name"];
+                    let url = "/stockdata?type=history&name=" + e["stock_name"];
                     $.get(url, plotHis, "json");
                     addRealLoop(e["stock_name"])
                 });
@@ -218,45 +267,4 @@ $(function () {
         $('#page-fig').hide()
         getSum();
     })
-    // console.log('hghh') 
-    // char = new Chart(ctx, {
-    //     type: 'line',
-    //     data: {
-    //         labels: [1550759400.0, 1551105000.0, 1576852200],
-    //         datasets: [{
-    //             label: "nvida",
-    //             backgroundColor:"rgba(255,255,255,0.1",
-    //             borderColor:"rgba(255,255,255,0.5",
-    //             data: [12, 20,50]
-    //         }]
-    //     },
-    //     options: {
-    //         scales: {
-    //             xAxes: [{
-    //                 type: 'time',
-    //                 time: {
-    //                 displayFormats: {
-    //                     week: 'll'
-    //                 }
-    //                 },
-    //                 gridLines: {
-    //                     color:"rgba(255,255,255,0.2)"
-    //                 },
-    //                 time: {
-    //                     unit: 'day'
-    //                 }
-    //             }],
-    //             yAxes: [{
-    //                 gridLines: {
-    //                     color:"rgba(255,255,255,0.2)"
-    //                 }
-    //             }]
-    //         }
-    //     }
-    // })
-    // char.data.labels.push(1582813800);
-    // char.data.datasets.forEach((dataset) => {
-    //     dataset.data.push(60);
-    // });
-    // char.update()
 });
