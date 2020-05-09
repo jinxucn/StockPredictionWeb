@@ -1,14 +1,23 @@
 import numpy as np
 import pandas as pd
+from sqlalchemy import create_engine
 import os
 
 
-def import_file(path):
-    df = pd.read_csv(path)
-    df = df.iloc[:, [0, 2,4,5]]
+def import_file(stock_id, type):
+    db = 'mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks'
+    engine = create_engine(db)
+    if type == '1d':
+        sql = 'select day,close,low,high from history_day where stock_id=' + \
+            str(stock_id)
+    elif type == '1m':
+        sql = 'select minute,close,low,high from real_time where stock_id=' + \
+            str(stock_id)
+    df = pd.read_sql_query(sql, engine)
     data_np = df.to_numpy().transpose()
     data_np[data_np == " None"] = "0"
     return data_np.astype(float)
+
 
 def load_df():
     if os.path.exists('./result/indicator.csv'):
@@ -20,37 +29,47 @@ def load_df():
     if os.path.exists('./result/bayesian.csv'):
         df_bayesian = pd.read_csv('./result/bayesian.csv')
     else:
-        df_bayesian = pd.DataFrame(columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
+        df_bayesian = pd.DataFrame(
+            columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
 
     if os.path.exists('./result/arima.csv'):
         df_arima = pd.read_csv('./result/arima.csv')
     else:
-        df_arima = pd.DataFrame(columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
+        df_arima = pd.DataFrame(
+            columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
 
     if os.path.exists('./result/svm.csv'):
         df_svm = pd.read_csv('./result/svm.csv')
     else:
-        df_svm = pd.DataFrame(columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
+        df_svm = pd.DataFrame(
+            columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
 
     if os.path.exists('./result/lstm.csv'):
         df_lstm = pd.read_csv('./result/lstm.csv')
     else:
-        df_lstm = pd.DataFrame(columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
-    return df_indicator,df_bayesian,df_arima,df_svm,df_lstm
+        df_lstm = pd.DataFrame(
+            columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
+    return df_indicator, df_bayesian, df_arima, df_svm, df_lstm
 
-def save_df(df_indicator,df_bayesian,df_arima,df_svm,df_lstm):
-    df_indicator.to_csv('./result/indicator.csv',index=False)
-    df_bayesian.to_csv('./result/bayesian.csv')
-    df_arima.to_csv('./result/arima.csv')
-    df_svm .to_csv('./result/svm.csv')
-    df_lstm.to_csv('./result/lstm.csv')
-    print("Result saved.")
+
+def save_df(df, dbname, exists):
+    db = 'mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks'
+    engine = create_engine(db)
+    pd.io.sql.to_sql(df, dbname, con=engine,
+                     index=False, if_exists=exists)
+
+    # df_indicator.to_csv('./result/indicator.csv', index=False)
+    # df_bayesian.to_csv('./result/bayesian.csv')
+    # df_arima.to_csv('./result/arima.csv')
+    # df_svm .to_csv('./result/svm.csv')
+    # df_lstm.to_csv('./result/lstm.csv')
+    # print("Result saved.")
 
 def timestamp2index(data):
-    h,w=data.shape
-    data_temp=np.zeros((h,w))
-    data_temp[0] = (data[0]-data[0,0])/60
-    data_temp[1:]=data[1:]
+    h, w = data.shape
+    data_temp = np.zeros((h, w))
+    data_temp[0] = (data[0]-data[0, 0])/60
+    data_temp[1:] = data[1:]
     return data_temp
 
 
@@ -61,37 +80,39 @@ def timestamp2index(data):
 
 
 def normalize(data):
-    h,w=data.shape
-    data_norm=np.zeros((h,w))
+    h, w = data.shape
+    data_norm = np.zeros((h, w))
     for i in range(len(data)):
-        max=np.max(data[i])
-        min=np.min(data[i])
-        data_norm[i]=np.subtract(data[i],min)/(max-min)
+        max = np.max(data[i])
+        min = np.min(data[i])
+        data_norm[i] = np.subtract(data[i], min)/(max-min)
     return data_norm
 
-def recover(data,y):
-    max=np.max(data)
-    min=np.min(data)
-    y_recover=y*(max-min)+min
+
+def recover(data, y):
+    max = np.max(data)
+    min = np.min(data)
+    y_recover = y*(max-min)+min
     return y_recover
 
-def generate_dataset(data,n=30):
-    price=normalize(data)[1]
-    x=[]
-    y=[]
+
+def generate_dataset(data, n=30):
+    price = normalize(data)[1]
+    x = []
+    y = []
     for i in range(len(price)-n):
         x.append(price[i:i+n])
         y.append(price[i+n])
-        train_size=int(len(x)*0.7)
-        train_x=np.array(x[:train_size],dtype=np.float32).reshape(-1,1,n)
-        train_y=np.array(y[:train_size],dtype=np.float32).reshape(-1,1,1)
-        test_x=np.array(x[train_size:],dtype=np.float32).reshape(-1,1,n)
-        test_y=np.array(y[train_size:],dtype=np.float32).reshape(-1,1,1)
-    return train_x,train_y,test_x,test_y
+        train_size = int(len(x)*0.7)
+        train_x = np.array(x[:train_size], dtype=np.float32).reshape(-1, 1, n)
+        train_y = np.array(y[:train_size], dtype=np.float32).reshape(-1, 1, 1)
+        test_x = np.array(x[train_size:], dtype=np.float32).reshape(-1, 1, n)
+        test_y = np.array(y[train_size:], dtype=np.float32).reshape(-1, 1, 1)
+    return train_x, train_y, test_x, test_y
 
 
-def phi(x,M):
-    phiX=np.zeros(M+1)
+def phi(x, M):
+    phiX = np.zeros(M+1)
     for i in range(M+1):
-        phiX[i]=x**i
-    return phiX.reshape((M+1,1))
+        phiX[i] = x**i
+    return phiX.reshape((M+1, 1))

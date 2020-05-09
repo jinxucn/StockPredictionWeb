@@ -42,4 +42,4 @@ class SVR():
         #                                       "gamma": np.logspace(-3, 3, 7)})
         svr=svm.SVR()
         svr.fit(self.x[-24*7-1:-1].reshape(-1, 1),self.y[-24*7-1:-1])
-        return svr.predict(np.array([self.x[-1]+60]).reshape(1,-1))[0]
+        return svr.predict(np.array([self.x[-1]+5]).reshape(1,-1))[0]
