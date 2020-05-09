@@ -74,15 +74,40 @@ algorithm_name VARCHAR(40) NOT NULL)
 insert into algorithm (algorithm_name)values
 ("POLY_BAYES") ,("SVM"), ("LSTM"), ("ARIMA")
 
-create table prediction
+create table pred_long
 (
+pred_time int,
 stock_ID INT UNSIGNED,
 algorithm_ID INT UNSIGNED AUTO_INCREMENT,
 time_stamp int,
 pred_value float,
-PRIMARY KEY(stock_ID, algorithm_ID, time_stamp),
+PRIMARY KEY(pred_time, stock_ID, algorithm_ID, time_stamp),
 FOREIGN KEY(stock_ID) REFERENCES stock_name(stock_ID),
 FOREIGN KEY(algorithm_ID) REFERENCES algorithm(algorithm_ID)
 )
 
+create table pred_short
+(
+pred_time int,
+stock_ID INT UNSIGNED,
+algorithm_ID INT UNSIGNED AUTO_INCREMENT,
+time_stamp int,
+pred_value float,
+PRIMARY KEY(pred_time, stock_ID, algorithm_ID, time_stamp),
+FOREIGN KEY(stock_ID) REFERENCES stock_name(stock_ID),
+FOREIGN KEY(algorithm_ID) REFERENCES algorithm(algorithm_ID)
+)
+
+create table indicator
+(
+stock_ID INT UNSIGNED,
+time_stamp int,
+pred_time int,
+MACD float,
+boll_up float,
+boll_mid float,
+boll_low float, 
+PRIMARY KEY(pred_time, stock_ID, time_stamp),
+FOREIGN KEY(stock_ID) REFERENCES stock_name(stock_ID)
+)
 
