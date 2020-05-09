@@ -113,7 +113,56 @@ def getTicker():
     return jsonify(result)
 
 
+@app.route('/long', methods=['GET'])
+def getLong():
+    name = request.args.get("name")
+    indicator = db.session.execute(
+        'select * from indicator where stockID="{}"'.format(name))
+    res = {
+        'BBupper': [],
+        'BBmiddle': [],
+        'BBlower': [],
+        'MACD': [],
+        'slowD': [],
+        'slowK': [],
+        'timestamp': []
+    }
+    for i in indicator:
+        res['BBupper'].append(i[0])
+        res['BBlower'].append(i[1])
+        res['timestamp'].append(i[2])
+        res['MACD'].append(i[3])
+        res['slowD'].append(i[4])
+        res['slowK'].append(i[5])
+        res['BBmiddle'].append(i[6])
 
+    predict = db.session.execute(
+        'select * from predict_long where stockID="{}"'.format(name))
+    for p in predict:
+        val = p[0]
+        timestamp = p[2]
+    res['predict'] = {
+        'value': val,
+        'timestamp': timestamp
+    }
+    return jsonify(res)
+
+
+@app.route('/short', methods=['GET'])
+def getShort():
+    name = request.args.get("name")
+    predict = db.session.execute(
+        'select * from predict_short where stockID="{}"'.format(name))
+    val = []
+    timestamp = []
+    for p in predict:
+        val.append(p[0]),
+        timestamp.append(p[2])
+    res = {
+        'Bayesian': {'value': val[0], 'timestamp': timestamp[0]},
+        'SVM': {'value': val[1], 'timestamp': timestamp[1]},
+    }
+    return jsonify(res)
 
 def timecontrol():
     lt = time.localtime()
@@ -168,6 +217,10 @@ def getReal():
                     })
 
 
-
 if __name__ == '__main__':
     app.run(debug=True)
+    # sql = 'select * from indicator where stockID="NVDA"'
+    # sql = 'select * from predict_short where stockID="NVDA"'
+    # res = db.session.execute(sql)
+    # for r in res:
+    #     print(r)

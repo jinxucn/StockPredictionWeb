@@ -6,8 +6,13 @@
 
 
 $(function () {
+    // let url = "/static/testdata/long.json"
+    // $.get(url, plotIndicator, "json")
     var ctx1 = $('#chart1')
     var ctx2 = $('#chart2')
+    var ctx3 = $('#chart3')
+    var ctx4 = $('#chart4')
+    var ctx5 = $('#chart5')
     var option = {
         scales: {
             xAxes: [{
@@ -38,6 +43,9 @@ $(function () {
     };
     var chart1 = new Chart(ctx1, { type: "line", options: option })
     var chart2 = new Chart(ctx2, { type: "line", options: option })
+    var chart3 = new Chart(ctx3, { type: "line", options: option })
+    var chart4 = new Chart(ctx4, { type: "line", options: option })
+    var chart5 = new Chart(ctx5, { type: "line", options: option })
     function plotHis(dataJson) {
         if (chart1) chart1.destroy();
         let name = dataJson['name'];
@@ -77,6 +85,128 @@ $(function () {
         let his = $("#historically").children().removeClass('zero')
         his[0].innerText = Math.max.apply(null, dataJson['high'])
         his[1].innerText = Math.min.apply(null, dataJson['low'])
+    };
+    function plotIndicator(dataJson) {
+        if (chart3) {
+            chart3.destroy();
+            chart4.destroy();
+            chart5.destroy();
+        }
+        let labels = dataJson['timestamp'];
+        labels = labels.map(i => i * 1000);
+        chart3 = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'BBupper',
+                    data: dataJson['BBupper'],
+                    backgroundColor: "rgba(238,0,0,0.1)",
+                    borderColor: "rgba(238,0,0,0.5)",
+                    pointRadius: 1
+                }, {
+                    label: 'BBmiddle',
+                    data: dataJson['BBmiddle'],
+                    backgroundColor: "rgba(0,0,238,0.1)",
+                        borderColor: "rgba(0,0,238,0.5)",
+                    pointRadius: 1
+                }, {
+                    label: 'BBlower',
+                    data: dataJson['BBlower'],
+                    backgroundColor: "rgba(0,238,0,0.1)",
+                    borderColor: "rgba(0,238,0,0.5)",
+                    pointRadius: 1
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }]
+                }
+            },
+        });
+        chart4 = new Chart(ctx4, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'slowD',
+                    data: dataJson['slowD'],
+                    backgroundColor: "rgba(238,0,0,0.1)",
+                    borderColor: "rgba(238,0,0,0.5)",
+                    pointRadius: 1
+                }, {
+                    label: 'slowK',
+                    data: dataJson['slowK'],
+                    backgroundColor: "rgba(0,238,0,0.1)",
+                    borderColor: "rgba(0,238,0,0.5)",
+                    pointRadius: 1
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }]
+                }
+            },
+        });
+        chart5 = new Chart(ctx5, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'MACD',
+                    data: dataJson['MACD'],
+                    backgroundColor: "rgba(0,238,0,0.1)",
+                    borderColor: "rgba(0,238,0,0.5)",
+                    pointRadius: 1
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: "rgba(255,255,255,0.2)"
+                        },
+                    }]
+                }
+            },
+        });
+        $('#LSTM').removeClass('zero')[0].innerText = dataJson['predict']['value']
+        console.log(dataJson['predict'])
     }
     function plotReal(dataJson) {
         if (chart2) chart2.destroy();
@@ -170,11 +300,16 @@ $(function () {
         realtime[4].innerText = dataJson['close'].slice(-1)[0]
     }
     var loopflag;
-    function addRealLoop(name) {
+    function realTimeLoop(name) {
         console.log("getting realtime " + name);
         let url = "/stockdata?type=realtime&name=" + name;
-        $.get(url, plotReal, "json")
-        loopflag = setTimeout(function () { addRealLoop(name) }, 60000)
+        $.get(url, plotReal, "json");
+        url = "/short?name=" + name;
+        $.get(url, function (dataJson) {
+            $('#Bayesian').removeClass('zero')[0].innerText = dataJson['Bayesian']['value']
+            $('#SVM').removeClass('zero')[0].innerText = dataJson['SVM']['value']
+        },'json')
+        loopflag = setTimeout(function () { realTimeLoop(name) }, 60000);
         // $.ajax({
         //     type: 'GET',
         //     timeout: 10000,
@@ -218,13 +353,15 @@ $(function () {
                     // let url = "/static/testdata/" + e["stock_name"] + ".json";
                     let url = "/stockdata?type=history&name=" + e["stock_name"];
                     $.get(url, plotHis, "json");
-                    addRealLoop(e["stock_name"])
+                    url = '/long?name=' + e["stock_name"]
+                    $.get(url,plotIndicator,'json')
+                    realTimeLoop(e["stock_name"])
                 });
                 ul.append(a);
             });
         },
         error: function () {
-            alert('error');
+            // alert('error');
         }
 
     })

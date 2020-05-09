@@ -1,7 +1,7 @@
 <!--
  * @Author: Jin X
  * @Date: 2019-11-27 13:25:48
- * @LastEditTime: 2020-05-07 21:03:56
+ * @LastEditTime: 2020-05-09 18:24:00
  -->
 
 <html>
@@ -37,17 +37,25 @@
             <h3>Chart</h3>
             <canvas id="chart1" width="900" height="400"></canvas>
             <canvas id="chart2" width="900" height="400"></canvas>
+            <h3>Indicator</h3>
+            <div style="overflow: hidden;" id="indicator">
+                <canvas style="float: left;" class="col-6" id="chart3" width="450" height="200"></canvas>
+                <canvas style="float: left;" class="col-6" id="chart4" width="450" height="200"></canvas>
+                <canvas style="float: left;" class="col-6" id="chart5" width="450" height="200"></canvas>
+            </div>
             <div id="features">
                 <h3>Predition</h3>
                 <table class="col-12 table table-borderless">
                     <tbody style="text-align: center;">
                         <tr>
-                            <td>Five minutes later</td>
-                            <td>Three days later</td>
+                            <td>Bayesian/5m later</td>
+                            <td>SVM/5m later</td>
+                            <td>LSTM/3d later</td>
                         </tr>
                         <tr id="predict">
-                            <td class="zero">0</td>
-                            <td class="zero">0</td>
+                            <td id="Bayesian" class="zero">0</td>
+                            <td id="SVM" class="zero">0</td>
+                            <td id="LSTM" class="zero">0</td>
                         </tr>
                     </tbody>
                 </table>
