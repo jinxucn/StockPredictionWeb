@@ -10,8 +10,12 @@ def import_file(stock_id, type):
     if type == '1d':
         sql = 'select day,close,low,high from history_day where stock_id=' + \
             str(stock_id)
+        sql = 'select day,close,low,high from history_day where close is not null and stock_id=' + \
+            str(stock_id)
     elif type == '1m':
         sql = 'select minute,close,low,high from real_time where stock_id=' + \
+            str(stock_id)
+        sql = 'select minute,close,low,high from real_time where close is not null and stock_id=' + \
             str(stock_id)
     df = pd.read_sql_query(sql, engine)
     data_np = df.to_numpy().transpose()

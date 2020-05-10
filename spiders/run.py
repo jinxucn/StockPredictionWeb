@@ -77,7 +77,7 @@ def request(type):
                 zip(sid, timestamp, quote['open'], quote['close'], quote['volume'],
                     quote['low'], quote['high']))
             for d in data:
-                if d[4]:
+                if d[4] is not None:
                     res.append(d)
     return res
 
