@@ -1,0 +1,4 @@
+mysql_host: 'jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com'
+mysql_user: 'stockpredictor'
+mysql_password: 'buyer'
+mysql_db: 'stock'

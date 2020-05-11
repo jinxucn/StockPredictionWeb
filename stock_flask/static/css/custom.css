@@ -1,0 +1,74 @@
+*{
+    margin:0;
+    padding:0;
+    border:0;
+    color:white;
+}
+body{
+    background-color: #333;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 50px inset;
+    font-weight: 400;
+    font-size: large;
+}
+header::after{
+    clear: both;
+    content: "";
+    display: block;
+}
+header{
+    padding: 30px 0px 10px;
+    border-bottom: #fff solid;
+}
+header h1{
+    float: left ;
+}
+header nav{
+    margin: 25px 0;
+    float: right;
+}
+.page{
+    min-height: 1300px;
+    margin-top: 20px;
+    /* height: 1200px; */
+}
+.nav-link{
+    display: block;
+    color: rgba(255,255,254,0.5);
+    padding: 0 10px;
+}
+.nav-link:hover{
+    color: #fff;
+}
+.nav .active{
+    color: #fff;
+}
+.nav-pills .nav-link.active{
+    background-color: #333;
+}
+h3{
+    margin: 50px 0 10px;
+}
+td{
+    font-size: large;
+}
+canvas{
+    margin:50px 0px;
+}
+#features table{
+    margin: 0px 10px;
+}
+.zero{
+    /* color: rgba(255,255,255,0.5); */
+    opacity: 0.3;
+}
+footer{
+    /* background-color: Gainsboro; */
+    border-top: rgba(255,255,254,0.5) solid;
+    box-shadow: 0 0 5px rgba(255,255,254,0.5) inset;
+    bottom: 0px;
+}
+
+.list-group-item{
+    background-color: #333;
+    box-shadow: rgba(0, 0, 0, 0.5) 0 0 8px;
+}
