@@ -8,50 +8,35 @@ def import_file(stock_id, type):
     db = 'mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks'
     engine = create_engine(db)
     if type == '1d':
-        sql = 'select day,close,low,high from history_day where stock_id=' + \
-            str(stock_id)
-        sql = 'select day,close,low,high from history_day where close is not null and stock_id=' + \
+        sql = 'select day,close,low,high from history_day where close is not null and low is not null and high is not null and stock_id=' + \
             str(stock_id)
     elif type == '1m':
-        sql = 'select minute,close,low,high from real_time where stock_id=' + \
-            str(stock_id)
-        sql = 'select minute,close,low,high from real_time where close is not null and stock_id=' + \
+        sql = 'select minute,close,low,high from real_time where close is not null and low is not null and high is not null and stock_id=' + \
             str(stock_id)
     df = pd.read_sql_query(sql, engine)
+    df.dropna()
     data_np = df.to_numpy().transpose()
-    data_np[data_np == " None"] = "0"
+    # data_np[data_np == None] = "0"
     return data_np.astype(float)
 
 
-def load_df():
-    if os.path.exists('./result/indicator.csv'):
-        df_indicator = pd.read_csv('./result/indicator.csv')
-    else:
-        df_indicator = pd.DataFrame(
+def init_df():
+    df_indicator = pd.DataFrame(
             columns={'OperationTime', 'StockID', 'TargetTime', 'MACD_hist', 'BBupper', 'BBmiddle', 'BBlower', 'slowK',
                      'slowD'})
-    if os.path.exists('./result/bayesian.csv'):
-        df_bayesian = pd.read_csv('./result/bayesian.csv')
-    else:
-        df_bayesian = pd.DataFrame(
+
+    df_bayesian = pd.DataFrame(
             columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
 
-    if os.path.exists('./result/arima.csv'):
-        df_arima = pd.read_csv('./result/arima.csv')
-    else:
-        df_arima = pd.DataFrame(
-            columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
 
-    if os.path.exists('./result/svm.csv'):
-        df_svm = pd.read_csv('./result/svm.csv')
-    else:
-        df_svm = pd.DataFrame(
-            columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
+    df_arima = pd.DataFrame(
+        columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
 
-    if os.path.exists('./result/lstm.csv'):
-        df_lstm = pd.read_csv('./result/lstm.csv')
-    else:
-        df_lstm = pd.DataFrame(
+
+    df_svm = pd.DataFrame(
+        columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
+
+    df_lstm=pd.DataFrame(
             columns={'OperationTime', 'StockID', 'Algorithm', 'TargetTime', 'value'})
     return df_indicator, df_bayesian, df_arima, df_svm, df_lstm
 

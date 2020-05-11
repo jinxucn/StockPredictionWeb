@@ -41,5 +41,5 @@ class SVR():
         # svr = GridSearchCV(svm.SVR(), param_grid={"kernel": ("linear", 'rbf'), "C": np.logspace(-3, 3, 7),
         #                                       "gamma": np.logspace(-3, 3, 7)})
         svr=svm.SVR()
-        svr.fit(self.x[-24*7-1:-1].reshape(-1, 1),self.y[-24*7-1:-1])
+        svr.fit(self.x[-300:-1].reshape(-1, 1),self.y[-300:-1])
         return svr.predict(np.array([self.x[-1]+5]).reshape(1,-1))[0]
