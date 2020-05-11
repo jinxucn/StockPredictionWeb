@@ -6,8 +6,6 @@
 
 
 $(function () {
-    // let url = "/static/testdata/long.json"
-    // $.get(url, plotIndicator, "json")
     var ctx1 = $('#chart1')
     var ctx2 = $('#chart2')
     var ctx3 = $('#chart3')
@@ -18,9 +16,6 @@ $(function () {
             xAxes: [{
                 type: 'time',
                 time: {
-                    // displayFormats: {
-                    //     quarter: 'll'
-                    // },
                     unit: 'month'
                 },
                 gridLines: {
@@ -83,8 +78,11 @@ $(function () {
             },
         })
         let his = $("#historically").children().removeClass('zero')
-        his[0].innerText = Math.max.apply(null, dataJson['high'])
-        his[1].innerText = Math.min.apply(null, dataJson['low'])
+        his[0].innerText = dataJson['high10day']
+        his[1].innerText = dataJson['avg1year']
+        his[2].innerText = dataJson['low1year']
+        his[3].innerText = dataJson['less']
+        console.log(dataJson['low1year'])
     };
     function plotIndicator(dataJson) {
         if (chart3) {
@@ -206,7 +204,7 @@ $(function () {
             },
         });
         $('#LSTM').removeClass('zero')[0].innerText = dataJson['predict']['value']
-        console.log(dataJson['predict'])
+        // console.log(dataJson['predict'])
     }
     function plotReal(dataJson) {
         if (chart2) chart2.destroy();
@@ -215,7 +213,7 @@ $(function () {
         labels = labels.map(i => i * 1000);
         let volume = dataJson['volume'];
         volume[0] = 0;
-        volume[volume.length - 1] = 0;
+        // volume[volume.length - 1] = 0;
         let close = dataJson['close'];
         let high = dataJson['high'];
         let low = dataJson['low'];
@@ -309,30 +307,13 @@ $(function () {
             $('#Bayesian').removeClass('zero')[0].innerText = dataJson['Bayesian']['value']
             $('#SVM').removeClass('zero')[0].innerText = dataJson['SVM']['value']
         },'json')
+        url = "/listsReal"
+        $.get(url, function (dataJson) {
+            dataJson.forEach(e => {
+                $('#rt' + e['id']).text(e['price'])
+            })
+        }, 'json')
         loopflag = setTimeout(function () { realTimeLoop(name) }, 60000);
-        // $.ajax({
-        //     type: 'GET',
-        //     timeout: 10000,
-        //     dataType: 'json',
-        //     // url: "/realtime",
-        //     // data: name,
-        //     url: "/static/testdata/realtime.json",
-        //     success: function (result) {
-        //         let pre = $('#predict').children().removeClass('zero')
-        // let realtime = $('#realtime').children().removeClass('zero')
-        //         // pre[0].innerText=result["pre5minutes"]
-        //         // pre[1].innerText=result["pre3days"]
-        //         pre[0].innerText = rand()
-        //         pre[1].innerText = rand()
-        //         for (let i = 0; i < realtime.length; i++) {
-        //             realtime[i].innerText = rand()
-        //             // realtime[i].innerText=result["realtime"][i]
-        //         }
-
-        //         // loopflag=setTimeout(function(){addRealLoop(name)},5000)
-        //         loopflag = setTimeout(function () { addRealLoop(name) }, 60000)
-        //     }
-        // })
     }
     $.ajax({
         type: 'GET',
@@ -344,6 +325,8 @@ $(function () {
             let ul = $('ul.nav');
             result.forEach(e => {
                 let a = $('<a></a>').text(e["stock_name"]).addClass('nav-item nav-link').attr('href', '#');
+                a.append($('<br>'))
+                a.append($('<span id=rt'+e['stock_id']+'>').addClass('nav-link'))
                 a.click(function () {
                     clearTimeout(loopflag)
                     ul.children().removeClass('active')
@@ -361,48 +344,8 @@ $(function () {
             });
         },
         error: function () {
-            // alert('error');
+            alert('error');
         }
 
-    })
-    $('#nav-fig').click(function () {
-        $('#nav-fig').addClass('active')
-        $('#nav-sum').removeClass('active')
-        $('#page-fig').show()
-        $('#page-sum').hide()
-    })
-    function getSum() {
-        $tb = $('#tb')
-        $tb.bootstrapTable('showLoading');
-        var timeBegin = new Date();
-        $.ajax({
-            type: "GET",
-            timeout: 10000,
-            dataType: "json",
-            url: "/summary",
-            success: function (result) {
-                $tb.bootstrapTable('destroy');
-                var $tr = $('#colh').find('tr')
-                $tr.children().remove();
-                var first = result[0];
-                Object.keys(first).forEach(function (e) {
-                    $tr.append($('<th></th>').text(e).attr('data-field', e))
-                })
-                $tb.bootstrapTable();
-                $tb.bootstrapTable('load', result);
-                $tb.bootstrapTable('hideLoading')
-                console.log('load data')
-            },
-            error: function () {
-                alert("error");
-            }
-        });
-    };
-    $('#nav-sum').click(function () {
-        $('#nav-sum').addClass('active')
-        $('#nav-fig').removeClass('active')
-        $('#page-sum').show()
-        $('#page-fig').hide()
-        getSum();
     })
 });

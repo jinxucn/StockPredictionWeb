@@ -1,7 +1,7 @@
 <!--
  * @Author: Jin X
  * @Date: 2019-11-27 13:25:48
- * @LastEditTime: 2020-05-09 18:24:00
+ * @LastEditTime: 2020-05-11 14:34:03
  -->
 
 <html>
@@ -24,10 +24,10 @@
     <div class="container">
         <header>
             <h1>Stock Predictor</h1>
-            <nav class="nav">
+            <!-- <nav class="nav">
                 <a id="nav-fig" class="nav-link active" href="#">Figure</a>
                 <a id="nav-sum" class="nav-link" href="#">Summary</a>
-            </nav>
+            </nav> -->
 
 
         </header>
@@ -78,30 +78,24 @@
                         </tr>
                     </tbody>
                 </table>
-                <h3>Historically</h3>
+                <h3>Query</h3>
                 <table class="col-12 table table-borderless">
                     <tbody style="text-align: center;">
                         <tr>
-                            <td>highest</td>
-                            <td>lowest</td>
+                            <td>highest10day</td>
+                            <td>avg1year</td>
+                            <td>lowest1year</td>
+                            <td>less</td>
                         </tr>
                         <tr id="historically">
+                            <td class="zero">0</td>
+                            <td class="zero">0</td>
                             <td class="zero">0</td>
                             <td class="zero">0</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-        <div id="page-sum" class="page" style="display:none;">
-            <table id="tb" data-toggle="table" class="table table-striped">
-                <thead id="colh">
-                    <tr>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
         </div>
     </div>
     <footer class="page-footer font-small blue pt-4">
@@ -123,11 +117,6 @@
 
     </footer>
 
-    <!-- <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/popper.js"></script>
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/js/bootstrap-table.min.js"></script>
-    <script type="text/javascript" src="/js/table.js"></script> -->
     <script type="text/javascript" src="/static/js/jquery.min.js"></script>
     <script type="text/javascript" src="/static/js/popper.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>

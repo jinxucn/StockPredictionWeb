@@ -15,24 +15,17 @@ app = Flask(__name__)
 
 # configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks'
-#app.config['SQLALCHEMY_DATABASE_URI']='mysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks'
-#conn = sqlite3.connect('mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks')
-
-engine = create_engine('mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks') 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+engine = create_engine(
+    'mysql+pymysql://stockpredictor:buyer@jindb.c8ojtshzefs1.us-east-2.rds.amazonaws.com:3306/stocks')
 cursor = engine.connect()
 Session = sessionmaker(bind=engine)
 session = Session()
 
 
-#
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
-# init ma
 ma = Marshmallow(app)
 
-#  def as_dict(self):
-#   return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Stock(db.Model):
@@ -167,17 +160,18 @@ def getLong():
 def getShort():
     name = request.args.get("name")
     predict = db.session.execute(
-        'select * from predict_short where stockID="{}"'.format(name))
+        'select value,TargetTime from predict_short where stockID="{}"'.format(name))
     val = []
     timestamp = []
     for p in predict:
         val.append(p[0]),
-        timestamp.append(p[2])
+        timestamp.append(p[1])
     res = {
         'Bayesian': {'value': val[0], 'timestamp': timestamp[0]},
         'SVM': {'value': val[1], 'timestamp': timestamp[1]},
     }
     return jsonify(res)
+
 
 def timecontrol():
     lt = time.localtime()
@@ -198,17 +192,68 @@ def timecontrol():
     elif weekday == 6:
         return time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday-2, 9, 30, 0, 0, 0, 1))-1
 
+# sql #2:Get the highest stock price of any company in the last ten days
+def getHigh(stockID):
+    sql = '''select max(h.high)
+                from history_day as h 
+                where h.day >= unix_timestamp(current_date() - interval 10 day) 
+                and h.stock_ID={}'''.format(stockID)
+    result = cursor.execute(sql)
+    for i in result:
+        res = i[0]
+    return res
+# sql #3: Average stock price of any company in the latest one year
+# we use history_day.high for calculation
+def getAvg(stockID):
+    sql = '''select avg(h.close) 
+                from history_day as h 
+                where h.day >=  unix_timestamp(current_date()- interval 1 year) 
+                and h.stock_ID={}'''.format(stockID)
+    result = cursor.execute(sql)
+    for i in result:
+        res = i[0]
+    return res
 
+# sql #4: Lowest stock price for any company in the latest one year
+# use history_day.low for calculation
+def getLow(stockID):
+    sql = '''select min(h.low)
+                from history_day as h 
+                where h.day >= unix_timestamp(current_date()- interval 1 year)
+                and h.stock_ID={}'''.format(stockID)
+    result = cursor.execute(sql)
+    for i in result:
+        res = i[0]
+    return res
+
+# sql #5 List the ids of companies along with their name who have the average stock price lesser than the lowest of any of the Selected Company in the latest one year.
+def getLess(stockID):
+    sql = '''select s1.stock_name from stock_name as
+    s1 join history_day as h1 on (s1.stock_ID=h1.stock_ID) 
+    where h1.day >= unix_timestamp(current_date() - interval 1 year) 
+    group by s1.stock_name having avg(h1.close) > (select min(h2.low) 
+    from stock_name as s2 join history_day as h2 on(s2.stock_ID=h2.stock_ID) 
+    where h2.day >= unix_timestamp(current_date() - interval 1 year) and s2.stock_ID={})'''.format(stockID)
+    result = db.session.execute(sql)
+    name = []
+    for i in result:
+        name.append(i[0])
+    return name
 # get historical/real time data of each company
 @app.route('/stockdata', methods=['GET'])
 def getReal():
     name = request.args.get("name")
     datatype = request.args.get("type")
+    res = {}
     if datatype == "history":
         stock_details = Stock.query.filter_by(stock_name=name).first()
         stock_detail = stock_details.stock_id
         detail = History_day.query.filter_by(stock_id=stock_detail)
         list_time = [u.day for u in detail]
+        res['high10day'] = getHigh(stock_detail)
+        res['avg1year'] = getAvg(stock_detail)
+        res['low1year'] = getLow(stock_detail)
+        res['less'] = getLess(stock_detail)
 
     elif datatype == "realtime":
         lastOpenTime = timecontrol()
@@ -226,114 +271,32 @@ def getReal():
     list_volume = [u.volume for u in detail]
     list_high = [u.high for u in detail]
     list_low = [u.low for u in detail]
-    return jsonify({"name": name, "open": list_open, "timestamp": list_time,
-                    "close": list_close, "volume": list_volume,
-                    "high": list_high, "low": list_low
-                    })
-
+    res['name'] = name
+    res['open'] = list_open
+    res['timestamp'] = list_time
+    res['close'] = list_close
+    res['volume'] = list_volume
+    res['high'] = list_high
+    res['low'] = list_low
+    return jsonify(res)
 
 
 # sql question 1: list of all companies with their latest stock price (real time latest)
 @app.route('/listsReal', methods=['GET'])
 def getlist():
-    
-    q = ('select stock_name.stock_name,real_time.open '
-         'from stock_name JOIN real_time ON (stock_name.stock_ID = real_time.stock_ID) order by minute desc limit 10;')
-    result = cursor.execute(q)
-   # result = cursor.fetchall()
-   
-    
-    #list_name = [u.stock_name for u in result]
-    name = []
-    price = []
-    ret = []
+    sql = 'select max(minute) as minute,close,stock_ID from real_time group by stock_ID;'
+    result = cursor.execute(sql)
+    res = []
     for i in result:
-        name.append(i.stock_name)
-        price.append(i.open)
-        #price.append(i[1])
-    ret = ([{'name': name,'price': price}])
-    return jsonify(ret)
-    
-#sql #2:Get the highest stock price of any company in the last ten days
-@app.route('/getHigh', methods = ['GET'])
-def getHigh():
-    q = ('select s.stock_name, max(h.high)'
-    'from stock_name as s join history_day as h on (s.stock_ID = h.stock_ID)'
-    'where h.day >= unix_timestamp(current_date() - interval 10 day)'
-    'group by s.stock_name')
-    result = cursor.execute(q)
-    name = []
-    max_price = []
-    ret = []
-    for i in result:
-        name.append(i[0])
-        max_price.append(i[1])
-    ret = ([{'name': name, 'max': max_price}])
-    return jsonify(ret)
-#sql #3: Average stock price of any company in the latest one year
-# we use history_day.high for calculation
-@app.route('/getAvg', methods = ['GET'])
-def getAvg():
-    q = ('select s.stock_name, avg(h.high)'
-          'from stock_name as s join history_day as h on (s.stock_ID = h.stock_ID)'
-          'where h.day >=  unix_timestamp(current_date()- interval 1 year)'
-          'group by s.stock_name;')
-    result = cursor.execute(q)
-    name = []
-    avg_price = []
-    ret = []
-    for i in result:
-        name.append(i.stock_name)
-        avg_price.append(i[1])
-    ret = ([{'name': name, 'avg': avg_price}])
-    return jsonify(ret)
+        res.append({
+            'id': i.stock_ID,
+            'price': i.close,
+            'timestamp': i.minute
+        })
+    return jsonify(res)
 
-#sql #4: Lowest stock price for any company in the latest one year
-# use history_day.low for calculation
-@app.route('/getLow', methods = ['GET'])
-def getLow():
-    q = ('select s.stock_name, min(h.low)'
-    'from stock_name as s join history_day as h on (s.stock_ID = h.stock_ID)'
-    'where h.day >= unix_timestamp(current_date()- interval 1 year)'
-    'group by s.stock_name;')
-    result = cursor.execute(q)
-    name = []
-    low_price = []
-    ret = []
-    for i in result:
-        name.append(i.stock_name)
-        low_price.append(i[1])
-    ret = ([{'name': name, 'low': low_price}])
-    return jsonify(ret)
-
-#sql #5 List the ids of companies along with their name who have the average stock price lesser than the lowest of any of the Selected Company in the latest one year.
-@app.route('/getLess', methods = ['GET','POST'])
-#@app.route('/getLess/<string:name>', methods = ['GET','POST'])
-def getLess():
-    #stock = Stock.query.filter_by(stock_name=name).first()
-    #real_id = stock.stock_id
-    q =  ('select s1.stock_name'
-          'from stock_name as s1 join history_day as h1 on (s1.stock_ID = h1.stock_ID)'
-          'where h1.day >=  unix_timestamp(current_date()- interval 1 year)' 
-          'group by s1.stock_name'
-          'having avg(h1.close) > (select min(h2.low)'
-                                'from stock_name as s2 join history_day as h2 on (s2.stock_ID = h2.stock_ID)'
-                                'where h2.day >= unix_timestamp(current_date()- interval 1 year)'
-                                'and s2.stock_ID = 1)')
-    result = db.session.execute(q) 
-    name = []
-    ret = []
-    for i in result:
-        name.append(i[0])
-    ret = ({'name': name})
-    return jsonify(ret)
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-    # sql = 'select * from indicator where stockID="NVDA"'
-    # sql = 'select * from predict_short where stockID="NVDA"'
-    # res = db.session.execute(sql)
-    # for r in res:
-    #     print(r)
