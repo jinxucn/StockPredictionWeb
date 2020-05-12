@@ -136,19 +136,19 @@ def getLong():
         'timestamp': []
     }
     for i in indicator:
-        res['BBupper'].append(i[0])
-        res['BBlower'].append(i[1])
-        res['timestamp'].append(i[2])
-        res['MACD'].append(i[3])
-        res['slowD'].append(i[4])
-        res['slowK'].append(i[5])
-        res['BBmiddle'].append(i[6])
+        res['BBupper'].append(i.BBupper)
+        res['BBlower'].append(i.BBlower)
+        res['timestamp'].append(i.TargetTime)
+        res['MACD'].append(i.MACD_hist)
+        res['slowD'].append(i.slowD)
+        res['slowK'].append(i.slowK)
+        res['BBmiddle'].append(i.BBmiddle)
 
     predict = db.session.execute(
-        'select * from predict_long where stockID="{}"'.format(name))
+        'select TargetTime,value from predict_long where stockID="{}"'.format(name))
     for p in predict:
-        val = p[0]
-        timestamp = p[2]
+        val = p[1]
+        timestamp = p[0]
     res['predict'] = {
         'value': val,
         'timestamp': timestamp
@@ -299,4 +299,7 @@ def getlist():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+
+    sql = '''delete from history_day where day>=1588858200;'''
+    db.session.execute(sql)

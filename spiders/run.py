@@ -64,7 +64,7 @@ def request(type):
     }
     for stock in stockSymbols:
         url = 'https://query1.finance.yahoo.com/v8/finance/chart/'+stock
-        payload['period1'] = latest[stockIDs[stock]]
+        payload['period1'] = latest[stockIDs[stock]]+3600*8
         payload['symbol'] = stock
         r = requests.get(url, payload)
         result = r.json()['chart']['result'][0]
@@ -89,8 +89,8 @@ def main():
         if len(cc) == 3:
             oneday = request('1d')
             load('1d', oneday)
-            onehour = request('1h')
-            load('1h', onehour)
+            # onehour = request('1h')
+            # load('1h', onehour)
         else:
             isopen = cc[0]
             if isopen:
@@ -105,5 +105,12 @@ if __name__ == "__main__":
     # nextOpenTime = time.mktime(
     #     (lt.tm_year, lt.tm_mon, lt.tm_mday+3, 9, 30, 0, 0, 0, 1))
     # a = foo()
+    oneday = request('1d')
+    load('1d', oneday)
+    # for i in oneday:
+    #     print(i)
+    # latest = getLatestTime('1d', [i for i in range(1, len(stockSymbols)+1)])
+    # print(latest)
+    # load('1d', oneday)
 
-    main()
+    # main()
