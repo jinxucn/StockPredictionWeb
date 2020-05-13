@@ -15,6 +15,7 @@ def import_file(stock_id, type):
             str(stock_id)
     df = pd.read_sql_query(sql, engine)
     df.dropna()
+    print(df.head(5))
     data_np = df.to_numpy().transpose()
     # data_np[data_np == None] = "0"
     return data_np.astype(float)
@@ -62,12 +63,6 @@ def timestamp2index(data):
     return data_temp
 
 
-# def index2timestamp(data):
-#     data_temp=data
-#     data_temp[0] = data[0]*60+data[0,0]
-#     return data_temp
-
-
 def normalize(data):
     h, w = data.shape
     data_norm = np.zeros((h, w))
@@ -105,3 +100,13 @@ def phi(x, M):
     for i in range(M+1):
         phiX[i] = x**i
     return phiX.reshape((M+1, 1))
+
+def confusion_matrix(y_pred,y):
+    mat=np.zeros((2,2))
+    dy=[y[i+1]<y[i] for i in range(len(y)-1)]
+    dy_pred=[y_pred[i+1]<y[i] for i in range(len(y_pred)-1)]
+    dy=[int(x) for x in dy]
+    dy_pred=[int(x) for x in dy_pred]
+    for i in range(len(dy)):
+        mat[dy[i],dy_pred[i]]+=1
+    return mat

@@ -1,12 +1,10 @@
-import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
 import torch
 import torch.nn as nn
 import numpy as np
 from util import *
 import matplotlib.pyplot as plt
-from torch.utils.data import Dataset, DataLoader
+from sklearn.metrics import mean_squared_error
 
 class LSTM(nn.Module):
     def __init__(self,input_size,hidden_size=8,output_size=1,num_layers=2):
@@ -46,9 +44,12 @@ def eval_LSTM(model,test_x,test_y,n):
     test_y_tensor=torch.from_numpy(test_y[n:])
     y_pred=model(test_x_tensor)
     y_pred=y_pred.view(-1).data.numpy()
-    plt.plot(y_real)
     plt.plot(y_pred)
+    plt.plot(y_real)
     plt.show()
+    cmat=confusion_matrix(y_pred,y_real)
+    mse=mean_squared_error(y_real,y_pred)
+    return mse,cmat
 
 def predict_LSTM(model,data,n):
     x=data[-1].reshape(1,1,-1)

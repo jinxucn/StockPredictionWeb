@@ -12,7 +12,7 @@ class BayesianCF():
         self.beta = 10
         self.N = 24*7
         # b, a = signal.butter(8, 0.1, 'lowpass')
-        # self.y_filtered = signal.filtfilt(b, a, self.y)  # data为要过滤的信号
+        # self.y_filtered = signal.filtfilt(b, a, self.y)
 
     def predict(self,trainX,trainT,X_pred):
         # Determine S
@@ -31,6 +31,17 @@ class BayesianCF():
             Msum = np.add(Msum,phi(trainX[i],self.M)*trainT[i])
         mean=self.beta*phi(X_pred,self.M).transpose().dot(S.dot(Msum))
         return mean[0,0]
+
+    def eval(self):
+        y_fit = np.zeros(len(self.x) - 24 * 7)
+        for t in range(len(self.x) - 24 * 7):
+            y_fit[t] = self.predict(self.x[t:t + 24 * 7], self.y[t:t + 24 * 7], self.x[t + 24 * 7])
+        plt.plot(self.x[24*7:],self.y[24*7:])
+        plt.plot(self.x[24*7:],y_fit)
+        plt.show()
+        mse = mean_squared_error(y_fit, self.y[24 * 7:])
+        cmat=confusion_matrix(y_fit,self.y[24*7:])
+        return mse,cmat
 
     def autoadjust(self):
         mse = [0 for i in range(20)]
