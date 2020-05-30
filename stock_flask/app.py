@@ -312,14 +312,14 @@ def getLow():
 def getLess():
     #stock = Stock.query.filter_by(stock_name=name).first()
     #real_id = stock.stock_id
-    q =  ('select s1.stock_name'
+    q = ('select s1.stock_name'
           'from stock_name as s1 join history_day as h1 on (s1.stock_ID = h1.stock_ID)'
-          'where h1.day >=  unix_timestamp(current_date()- interval 1 year)' 
+          'where h1.day >= unix_timestamp(current_date()- interval 1 year)' 
           'group by s1.stock_name'
           'having avg(h1.close) > (select min(h2.low)'
                                 'from stock_name as s2 join history_day as h2 on (s2.stock_ID = h2.stock_ID)'
                                 'where h2.day >= unix_timestamp(current_date()- interval 1 year)'
-                                'and s2.stock_ID = 1)')
+                                'and s2.stock_ID = real_id)')
     result = db.session.execute(q) 
     name = []
     ret = []
